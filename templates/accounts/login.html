@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+    <h2>Bxoд</h2>
+        {% if user.is_authenticated %}
+            <p>Вы уже выполнили вход.</p>
+            <a href="{% url 'log-out' %}">Выйти</a>
+        {% else %}
+            <form action="{% url 'log-in' %}" method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="hidden" name="next" value="{{ next_page }}">
+                <button type="submit" class="btn btn-primary" vаluе="Войти">Войти</button>
+            </form>
+        {% endif %}
+    <p><a href="{% url 'sigh-up' %}">Регистрация</a></p>
+
+{% endblock %}

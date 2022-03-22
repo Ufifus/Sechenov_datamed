@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+    <!-- Search field for the searching in the database -->
+    <form class="search-form" action="{% url 'search_local_page' %}" method="get">
+        {% csrf_token %}
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="fa fa-search"></i>
+            </span>
+            {{ form.user_query }}
+            <button class="btn btn-light">Найти</button>
+        </div>
+    </form>
+    <p>{{ count }}</p>
+    <div id="wrapper"></div>
+    <!-- Grid.js table -->
+    <script type="text/javascript">
+        let list = {{db_data_list|safe}};
+    </script>
+    <script type="text/javascript" src="{% static 'search_engine/js/table_for_user_query.js' %}"></script>
+{% endblock %}

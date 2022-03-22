@@ -1,0 +1,8 @@
+{
+  "No_interaction": 0,
+  "Unknown": 1,
+  "advise": 2,
+  "effect": 3,
+  "int": 4,
+  "mechanism": 5
+}

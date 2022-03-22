@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+    <meta charset="UTF-8">
+    <!-- Load page icon -->
+    <link rel="icon" href="{% static 'favicon.ico' %}">
+    <!-- Load gridjs.umd.js -->
+    <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+    <script src="https://unpkg.com/jquery/dist/jquery.min.js"></script>
+    <script src="https://unpkg.com/gridjs-jquery/dist/gridjs.production.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" />
+    <!-- Load mermaid.min.css -->
+    <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet">
+    <!-- Import style for page header -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{% static 'Navigation-Clean.css' %}">
+    <!-- Import style for search bar -->
+    <link rel="stylesheet" type="text/css" href="{% static 'search_engine/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'search_engine/css/Pretty-Search-Form.css' %}">
+    <!-- Import style for text area -->
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-light navbar-expand-md navigation-clean">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'search_local_page' %}">Datamed</a>
+                <button data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navcol-1">
+                    <span class="visually-hidden">Toggle navigation</span>
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navcol-1">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item"></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'search_pubmed_page' %}">Поиск в PubMed</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'search_local_page' %}">Поиск в локальной базе данных</a></li>
+                        {% if user.is_authenticated %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'log-in' %}">{{ user }}</a></li>
+                        {% else %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'log-in' %}">Авторизация</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    </header>
+    {% block content %}
+    {% endblock %}
+</body>
+</html>

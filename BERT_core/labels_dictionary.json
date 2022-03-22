@@ -1,0 +1,11 @@
+{
+  "B-BRAND":  0,
+  "B-DRUG": 1,
+  "B-DRUG_N":  2,
+  "B-GROUP": 3,
+  "I-BRAND": 4,
+  "I-DRUG": 5,
+  "I-DRUG_N": 6,
+  "I-GROUP": 7,
+  "-": 8
+}
