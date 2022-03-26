@@ -2,6 +2,8 @@
 
 {% load static %}
 
+{% block title %}Local search{% endblock %}
+
 {% block content %}
     <!-- Search field for the searching in the database -->
     <form class="search-form" action="{% url 'search_local_page' %}" method="get">
@@ -14,7 +16,6 @@
             <button class="btn btn-light">Найти</button>
         </div>
     </form>
-    <p>{{ count }}</p>
     <div id="wrapper"></div>
     <!-- Grid.js table -->
     <script type="text/javascript">

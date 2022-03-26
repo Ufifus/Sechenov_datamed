@@ -2,6 +2,8 @@
 
 {% load static %}
 
+{% block title %}Global search{% endblock %}
+
 {% block content %}
     <!-- Search field for the searching in the database -->
     {% if form %}
@@ -20,7 +22,7 @@
         </form>
     {% endif %}
     {% if count %}
-        <p>кол-во найденных записей: {{ count }}</p>
+        <p>кол-во найденных документов: {{ count }}</p>
     {% endif %}
     {% if task_id %}
         <script type="text/javascript" src="{% static 'jquery-3.4.1.min.js' %}"></script>

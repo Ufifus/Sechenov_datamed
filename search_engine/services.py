@@ -1,12 +1,12 @@
 from django.contrib.auth.models import User
 
-from .models import DdiFact, Task, Source, DrugLink
+from .models import DdiFact, Task, Source
 from .tasks import get_PubMed_data_list as task_PubMed
-from .logics import get_access_to_PubMed as get_docs
-from .logics import docs_to_db, create_task
+from .tasks import parse_and_analise_docs as task_PubMedv2
+from .logics import get_global_data
 
-from django_celery_results.models import TaskResult
-from celery.result import AsyncResult
+from django_celery_results.models import TaskResult, GroupResult
+from celery import group
 
 import sys
 
@@ -16,8 +16,9 @@ path_to_bert = str(Path.joinpath(Path(__file__).resolve().parent.parent, 'BERT_c
 sys.path.append(path_to_bert)
 
 
-
-# Получаем данные из локальной бд
+"""
+    Получаем данные из локальной бд
+"""
 def get_articles_from_db(query):
     if query == 'all':
         db_objs = DdiFact.objects.all()
@@ -26,43 +27,60 @@ def get_articles_from_db(query):
     return list(db_objs.values())
 
 
-# запускаем celery-worker
-def run_query(email, search_string, query_task_id, source):
-    count, records = get_docs(email, search_string, source)  # Получаем записи и их количество из запроса в PubMed
-    print(count)
-    print(source)
+"""
+    1. Выполняем запрос в глобальные бд
+    2. Затем полученные данные выгружаем в воркер и обновляем task
+       в бд привязывая к ней номер таска который выполняет запрос
+"""
+def run_query_v1(email, search_string, query_task_id, source):
+    records, count = get_global_data(email, source, search_string)
     if int(count) == 0:  # Если нет таких то выводим на сайт
         task_id = None
-        print('this done')
+        print('this clear')
     else:
-        docs = docs_to_db(records)  # Если есть то проверяем их на валидность и новый массив документов загружаем в Bert
-
-        task = task_PubMed.delay(docs, query_task_id)  # Запускаем worker-accync
+        task = task_PubMed.delay(records, query_task_id)  # Запускаем worker-accync
         task_id = task.id  # Получаем id нашего воркера для отслеживания статуса
-
-        task_query = Task.objects.get(id_task=query_task_id)  #Находим наш запрос и сохраняем в нем id задания
+        task_query = Task.objects.get(id_task=query_task_id)  # Находим наш запрос и сохраняем в нем id задания
         task_query.task_back = str(task_id)
         task_query.save()
+    return task_id, count
+
+
+def run_query_v2(email, search_string, query_task_id, source):
+    """Данная ф-я пока в тестируется, ее суть в получении records и групповом выполнении"""
+    handle, count = get_global_data(email, source, search_string)  # Получаем записи и их количество из запроса в PubMed
+
+    if int(count) == 0:  # Если нет таких то выводим на сайт
+        task_id = None
+        print('this clear')
+    else:
+        """Думаю добавить сюда группу тасков которые принимают records;
+        вывести номер всей группы и вносить в нее изменения при при ослеживании кол-ва выполненых;
+        пока что надо подумать как это делать может join() получать выполненные и отправлять отслеживать по ним,
+        короче думаем!!!!!!!"""
 
     return task_id, count
 
 
-"""
-    Отслеживаем выполнение запросов
-        1. Если выполняется то выводим статус задания
-        2. Если выполнен то не выводим его 
 
-"""
 def get_query_status(username):
+    """ Отслеживаем выполнение запросов
+        1. Если выполняется то выводим статус задания
+        2. Если выполнен то не выводим его """
     user = User.objects.get(username=username)
-    tasks_query = Task.objects.filter(username=user).order_by('-query_time')[0]
-    print(tasks_query)
-    task_id = tasks_query.task_back
-    if task_id:
-        task_worker = TaskResult.objects.get(task_id=task_id)
-        if task_worker.status != 'PROGRESS':
-            task_id = None
-
+    if Task.objects.filter(username=user).exists():
+        tasks_query = Task.objects.filter(username=user).order_by('-query_time')[0]
+        print(tasks_query)
+        task_id = tasks_query.task_back
+        if task_id:
+            try:
+                task_worker = TaskResult.objects.get(task_id=task_id)
+                if task_worker.status != 'PROGRESS':
+                    task_id = None
+            except:
+                task_id = None
+    else:
+        task_id = None
     return task_id
 
 
@@ -88,3 +106,14 @@ def create_data(data):
     date = '/'.join(date)
     return date
 
+
+# Создаем пользовательский запрос
+def create_task(source, query_text, query_begin, query_end, username):
+    source = Source.objects.get(name=source)  # получаем сайт откуда брали данные
+    user = User.objects.get(username=username)  # пользователя который сделал запрос
+    query_task = Task(source_id=source, query_text=query_text,
+                      date_start=query_begin, date_end=query_end, username=user)  # получаем запрос
+    query_task.save()
+
+    task_id = query_task.id_task  # созраняем в запросе id задания которое выполняет воркер
+    return task_id
