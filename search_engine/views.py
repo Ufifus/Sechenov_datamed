@@ -38,7 +38,6 @@ class SearchPubmedView(LoginRequiredMixin, View):
 
             vals = form.cleaned_data
             query, source = get_search_string(vals)
-            # Создаем запрос
             query_task_id = create_task(source, vals['user_query'], vals['query_begin'], vals['query_end'], username)
 
             if source == 'PubMed' or 'PMC':

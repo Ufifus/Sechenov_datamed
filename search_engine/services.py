@@ -16,10 +16,8 @@ path_to_bert = str(Path.joinpath(Path(__file__).resolve().parent.parent, 'BERT_c
 sys.path.append(path_to_bert)
 
 
-"""
-    Получаем данные из локальной бд
-"""
 def get_articles_from_db(query):
+    """Получаем данные из локальной бд"""
     if query == 'all':
         db_objs = DdiFact.objects.all()
     else:
@@ -27,12 +25,10 @@ def get_articles_from_db(query):
     return list(db_objs.values())
 
 
-"""
-    1. Выполняем запрос в глобальные бд
-    2. Затем полученные данные выгружаем в воркер и обновляем task
-       в бд привязывая к ней номер таска который выполняет запрос
-"""
 def run_query_v1(email, search_string, query_task_id, source):
+    """1. Выполняем запрос в глобальные бд
+    2. Затем полученные данные выгружаем в воркер и обновляем task
+    в бд привязывая к ней номер таска который выполняет запрос"""
     records, count = get_global_data(email, source, search_string)
     if int(count) == 0:  # Если нет таких то выводим на сайт
         task_id = None
