@@ -1,0 +1,9 @@
+{% autoescape off %}
+
+Hello {{ user.username }}
+
+Please use the link bellow to verify your account
+
+http://{{domain}}{% url 'activate' uid64=uid64 token=token %}
+
+{% endautoescape %}

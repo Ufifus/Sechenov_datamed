@@ -155,3 +155,11 @@ REDIS_PORT = os.getenv('REDIS_PORT')
 CELERY_BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
 CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
 CELERY_TASK_SERIALISER = 'json'
+
+# Email messages
+
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'fashionproject2002@gmail.com'
+EMAIL_HOST_PASSWORD = 'Tema223155tema'
+EMAIL_POST = 587

@@ -170,8 +170,8 @@ class Task(models.Model):
     source_id = models.ForeignKey('Source', on_delete=models.CASCADE, db_column='source_id')
     query_text = models.CharField(max_length=45, blank=True, null=True)
     query_time = models.DateTimeField(blank=True, auto_now=True)
-    date_start = models.DateField(blank=True, auto_now=True)
-    date_end = models.DateField(blank=True, auto_now=True)
+    date_start = models.DateField(blank=True)
+    date_end = models.DateField(blank=True)
 
     class Meta:
         managed = True
