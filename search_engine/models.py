@@ -34,9 +34,9 @@ class Place(models.Model):
     # university = models.CharField(max_length=200)
     # country = models.CharField(max_length=50)
 
-    # class Meta:
-    #     managed = True
-    #     db_table = 'search_engine_place'
+    class Meta:
+        managed = True
+        db_table = 'search_engine_place'
 
 
 class DdiFact(models.Model):
@@ -47,9 +47,9 @@ class DdiFact(models.Model):
     parsing_txt = models.TextField()
     ddi_type = models.TextField()
 
-    # class Meta:
-    #     managed = True
-    #     db_table = 'search_engine_ddifact'
+    class Meta:
+        managed = True
+        db_table = 'search_engine_ddifact'
 
 
 class DdiResult(models.Model):
@@ -61,18 +61,18 @@ class DdiResult(models.Model):
     numb_sentence_in_doc = models.IntegerField()
     ddi_type = models.IntegerField()
 
-    # class Meta:
-    #     managed = True
-    #     db_table = 'search_engine_ddiresult'
+    class Meta:
+        managed = True
+        db_table = 'search_engine_ddiresult'
 
 
 class DrugLink(models.Model):
     id_fact = models.OneToOneField('DdiFact', on_delete=models.CASCADE, db_column='id_fact', primary_key=True)
     drug_name = models.TextField()
 
-    # class Meta:
-    #     managed = True
-    #     db_table = 'search_engine_druglink'
+    class Meta:
+        managed = True
+        db_table = 'search_engine_druglink'
 
 
 class DvaDdi(models.Model):
@@ -83,9 +83,9 @@ class DvaDdi(models.Model):
     sentencenumb = models.IntegerField(db_column='SentenceNumb')
     finddate = models.DateField(db_column='FindDate')
 
-    # class Meta:
-    #     managed = True
-    #     db_table = 'search_engine_dvaddi'
+    class Meta:
+        managed = True
+        db_table = 'search_engine_dvaddi'
 
 
 class DvaGisz(models.Model):
@@ -99,9 +99,9 @@ class DvaGisz(models.Model):
     gr = models.IntegerField(blank=True, null=True)
     mnn = models.TextField(blank=True, null=True)
 
-    # class Meta:
-    #     managed = True
-    #     db_table = 'search_engine_dvagisz'
+    class Meta:
+        managed = True
+        db_table = 'search_engine_dvagisz'
 
 
 class ExportPkgDesc(models.Model):
@@ -118,9 +118,9 @@ class ExportPkgDesc(models.Model):
     total_product_quantity = models.IntegerField(db_column='TOTAL_PRODUCT_QUANTITY', blank=True, null=True)
     strength = models.TextField(db_column='STRENGTH', blank=True, null=True)
 
-    # class Meta:
-    #     managed = True
-    #     db_table = 'search_engine_exportpkgdesc'
+    class Meta:
+        managed = True
+        db_table = 'search_engine_exportpkgdesc'
 
 
 class Rls(models.Model):
@@ -138,9 +138,9 @@ class Rls(models.Model):
     docum = models.CharField(db_column='Docum', max_length=255, blank=True, null=True)
     pharmgroup = models.CharField(db_column='PharmGroup', max_length=255, blank=True, null=True)
 
-    # class Meta:
-    #     managed = True
-    #     db_table = 'search_engine_rls'
+    class Meta:
+        managed = True
+        db_table = 'search_engine_rls'
 
 
 class Source(models.Model):
@@ -150,9 +150,9 @@ class Source(models.Model):
     def __str__(self):
         return self.name
 
-    # class Meta:
-    #     managed = True
-    #     db_table = 'search_engine_source'
+    class Meta:
+        managed = True
+        db_table = 'search_engine_source'
 
 
 class Task(models.Model):
@@ -165,8 +165,8 @@ class Task(models.Model):
     date_start = models.DateField(blank=True)
     date_end = models.DateField(blank=True)
 
-    # class Meta:
-    #     managed = True
-    #     db_table = 'search_engine_task'
+    class Meta:
+        managed = True
+        db_table = 'search_engine_task'
 
 
