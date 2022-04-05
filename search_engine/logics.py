@@ -1,4 +1,4 @@
-from .models import *
+from .models import DdiFact, DdiDocument, Author, Place, DrugLink
 
 from Bio import Entrez, Medline
 from pathlib import Path
@@ -37,7 +37,7 @@ class Analise_record:
                 data = None
                 return message, data
 
-            len_drug_doc, count_append = self.append_in_database(drug_doc)
+            len_drug_doc, count_append = self.append_in_database(drug_doc, rec_id)
 
             print(f'Из {len_drug_doc} обработанных Bert добавили в бд {count_append}')
 
@@ -50,7 +50,7 @@ class Analise_record:
 
     def check_in_database(self, rec_id):
         """Проверям на наличие в локальной бд, если есть то False если нет то True"""
-        if DdiFact.objects.filter(id_doc=rec_id).exists():
+        if DdiDocument.objects.filter(id_record=rec_id).exists():
             time.sleep(2)
             return True
         else:
@@ -69,23 +69,77 @@ class Analise_record:
             self.record['AB'] = '.'
         self.record['AB'] = self.record['TI'] + self.record['AB']
 
-    def append_in_database(self, drug_doc):
+    def append_in_database(self, drug_doc, rec_id):
         """Проходим по файлам обработаных Бертом и добавляем где есть иттерации"""
         count_add = 0
-        for drug in drug_doc:
-            print(drug['ddi_type'])
-            if drug['ddi_type'] != "No_interaction":  # если типа взаимодействия нет то не сохраняем
-                count_add += 1
-                ddi = self.append_DdiFact(drug)  # сохраняем предложение в локальную бд
-                for i in drug['drugs']:  # Циклом сохраняем все ссылки на препараты в этом предложении в локальную бд
-                    self.append_Drug(i, ddi)
+        if self.check_count_effects(drug_doc):
+            return len(drug_doc), count_add
+        else:
+            ddi_doc = self.append_DdiDoc(rec_id)
+            self.append_authors(ddi_doc)
+            self.append_places(ddi_doc)
+            for drug in drug_doc:
+                print(drug['ddi_type'])
+                if drug['ddi_type'] != "No_interaction":  # если типа взаимодействия нет то не сохраняем
+                    count_add += 1
+                    ddi = self.append_DdiFact(drug, ddi_doc)  # сохраняем предложение в локальную бд
+                    for i in drug['drugs']:  # Циклом сохраняем все ссылки на препараты в этом предложении в локальную бд
+                        self.append_Drug(i, ddi)
         return len(drug_doc), count_add
 
-    def append_DdiFact(self, drug):
+    def check_count_effects(self, drug_dict):
+        """Проверяем текст на наличие взаимодействий"""
+        for drug in drug_dict:
+            if drug['ddi_type'] != "No_interaction":
+                return False
+        return True
+
+    def append_DdiDoc(self, rec_id):
+        """Добавляем документ в бд с номером записи и кол-вом добалвенных предложений"""
+        ddi_doc = DdiDocument(
+            task_query=self.query_task,
+            id_record=rec_id,
+            title=self.record['TI']
+        )
+        ddi_doc.save()
+        return ddi_doc
+
+    def append_authors(self, ddi_doc):
+        """Добавляем авторов статьи"""
+        try:
+            authors = self.record['AU']
+        except:
+            authors = None
+        if authors:
+            for author_name in authors:
+                if Author.objects.filter(name_author=author_name).count() > 1:
+                    author = Author.objects.filter(name_author=author_name)[0]
+                else:
+                    author = Author.objects.get_or_create(name_author=author_name)[0]
+                ddi_doc.authors.add(author)
+
+    def append_places(self, ddi_doc):
+        """Добавляем места исследования"""
+        try:
+            places = self.record['AD']
+        except:
+            places = None
+        if places:
+            for place_str in places:
+                exist_place = Place.objects.filter(place_research=place_str)
+                if exist_place.count() > 1:
+                    place = exist_place[0]
+                elif exist_place.count() == 1.0:
+                    place = Place.objects.get(place_research=place_str)
+                elif exist_place.count() == 0.0:
+                    place = Place.objects.create(place_research=place_str)
+                ddi_doc.places.add(place)
+
+
+    def append_DdiFact(self, drug, ddi_doc):
         """Добавляем в бд взаимодействие"""
         ddi = DdiFact(
-            id_task=self.query_task,
-            id_doc=drug['id_doc'],
+            id_doc=ddi_doc,
             sentence_txt=drug['sentence_txt'],
             parsing_txt=drug['parsing_txt'],
             numb_sentence_in_doc=drug['numb_sentence_in_doc'],
@@ -146,7 +200,7 @@ def get_global_data(email, source, search_str):
     return records_const, rec_count
 
 
-
-
+class Place_dict(dict):
+    """Словарь для сохранения данных о месте исследования"""
 
 

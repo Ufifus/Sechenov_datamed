@@ -1,21 +1,55 @@
 from django.db import models
-from django_celery_results.models import TaskResult
 from django.contrib.auth.models import User
-from datetime import datetime, date
+
+
+class DdiDocument(models.Model):
+    """Документ который обработался"""
+    id_doc = models.BigAutoField(primary_key=True)
+    task_query = models.ForeignKey('Task', on_delete=models.CASCADE, db_column='id_task')
+    id_record = models.IntegerField()
+    title = models.TextField()
+    authors = models.ManyToManyField('Author')
+    places = models.ManyToManyField('Place')
+
+    # class Meta:
+    #     managed = True
+    #     db_table = 'search_engine_ddidocument'
+
+
+class Author(models.Model):
+    """Авторы статьи"""
+    id_author = models.BigAutoField(primary_key=True)
+    name_author = models.CharField(max_length=150)
+
+    # class Meta:
+    #     managed = True
+    #     db_table = 'search_engine_author'
+
+
+class Place(models.Model):
+    """Место иследования"""
+    id_place = models.BigAutoField(primary_key=True)
+    place_research = models.TextField()
+    # department = models.CharField(max_length=300)
+    # university = models.CharField(max_length=200)
+    # country = models.CharField(max_length=50)
+
+    # class Meta:
+    #     managed = True
+    #     db_table = 'search_engine_place'
 
 
 class DdiFact(models.Model):
     id_fact = models.BigAutoField(primary_key=True)
-    id_task = models.ForeignKey('Task', on_delete=models.CASCADE, db_column='id_task')
-    id_doc = models.IntegerField()
+    id_doc = models.ForeignKey('DdiDocument', on_delete=models.CASCADE, db_column='id_doc')
+    numb_sentence_in_doc = models.IntegerField()
     sentence_txt = models.TextField()
     parsing_txt = models.TextField()
-    numb_sentence_in_doc = models.IntegerField()
     ddi_type = models.TextField()
 
-    class Meta:
-        managed = True
-        db_table = 'ddi_fact'
+    # class Meta:
+    #     managed = True
+    #     db_table = 'search_engine_ddifact'
 
 
 class DdiResult(models.Model):
@@ -27,41 +61,18 @@ class DdiResult(models.Model):
     numb_sentence_in_doc = models.IntegerField()
     ddi_type = models.IntegerField()
 
-    class Meta:
-        managed = True
-        db_table = 'ddi_result'
-
-
-class DdiXFact(models.Model):
-    id_fact = models.BigAutoField(primary_key=True)
-    id_task = models.IntegerField()
-    id_doc = models.IntegerField()
-    sentence_txt = models.CharField(max_length=4096)
-    parsing_txt = models.CharField(max_length=4096)
-    numb_sentence_in_doc = models.IntegerField()
-    ddi_type = models.CharField(max_length=45)
-
-    class Meta:
-        managed = True
-        db_table = 'ddi_x_fact'
+    # class Meta:
+    #     managed = True
+    #     db_table = 'search_engine_ddiresult'
 
 
 class DrugLink(models.Model):
     id_fact = models.OneToOneField('DdiFact', on_delete=models.CASCADE, db_column='id_fact', primary_key=True)
     drug_name = models.TextField()
 
-    class Meta:
-        managed = True
-        db_table = 'drug_link'
-
-
-class DrugXLink(models.Model):
-    id_fact = models.IntegerField()
-    drug_name = models.CharField(max_length=4096)
-
-    class Meta:
-        managed = True
-        db_table = 'drug_x_link'
+    # class Meta:
+    #     managed = True
+    #     db_table = 'search_engine_druglink'
 
 
 class DvaDdi(models.Model):
@@ -72,9 +83,9 @@ class DvaDdi(models.Model):
     sentencenumb = models.IntegerField(db_column='SentenceNumb')
     finddate = models.DateField(db_column='FindDate')
 
-    class Meta:
-        managed = True
-        db_table = 'dva_ddi'
+    # class Meta:
+    #     managed = True
+    #     db_table = 'search_engine_dvaddi'
 
 
 class DvaGisz(models.Model):
@@ -88,28 +99,9 @@ class DvaGisz(models.Model):
     gr = models.IntegerField(blank=True, null=True)
     mnn = models.TextField(blank=True, null=True)
 
-    class Meta:
-        managed = True
-        db_table = 'dva_gisz'
-
-
-class DvaXGisz(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    code = models.IntegerField(blank=True, null=True)
-    rus = models.TextField(blank=True, null=True)
-    lat = models.TextField(blank=True, null=True)
-    eng = models.TextField(blank=True, null=True)
-    atx = models.TextField(blank=True, null=True)
-    snomed = models.TextField(blank=True, null=True)
-    gr = models.IntegerField(blank=True, null=True)
-    mnn = models.TextField(blank=True, null=True)
-    query_time = models.DateTimeField(blank=True, null=True)
-    date_start = models.DateField(blank=True, null=True)
-    date_end = models.DateField(blank=True, null=True)
-
-    class Meta:
-        managed = True
-        db_table = 'dva_x_gisz'
+    # class Meta:
+    #     managed = True
+    #     db_table = 'search_engine_dvagisz'
 
 
 class ExportPkgDesc(models.Model):
@@ -126,9 +118,9 @@ class ExportPkgDesc(models.Model):
     total_product_quantity = models.IntegerField(db_column='TOTAL_PRODUCT_QUANTITY', blank=True, null=True)
     strength = models.TextField(db_column='STRENGTH', blank=True, null=True)
 
-    class Meta:
-        managed = True
-        db_table = 'export_pkg_desc'
+    # class Meta:
+    #     managed = True
+    #     db_table = 'search_engine_exportpkgdesc'
 
 
 class Rls(models.Model):
@@ -146,9 +138,9 @@ class Rls(models.Model):
     docum = models.CharField(db_column='Docum', max_length=255, blank=True, null=True)
     pharmgroup = models.CharField(db_column='PharmGroup', max_length=255, blank=True, null=True)
 
-    class Meta:
-        managed = True
-        db_table = 'rls'
+    # class Meta:
+    #     managed = True
+    #     db_table = 'search_engine_rls'
 
 
 class Source(models.Model):
@@ -158,9 +150,9 @@ class Source(models.Model):
     def __str__(self):
         return self.name
 
-    class Meta:
-        managed = True
-        db_table = 'source'
+    # class Meta:
+    #     managed = True
+    #     db_table = 'search_engine_source'
 
 
 class Task(models.Model):
@@ -173,8 +165,8 @@ class Task(models.Model):
     date_start = models.DateField(blank=True)
     date_end = models.DateField(blank=True)
 
-    class Meta:
-        managed = True
-        db_table = 'task'
+    # class Meta:
+    #     managed = True
+    #     db_table = 'search_engine_task'
 
 

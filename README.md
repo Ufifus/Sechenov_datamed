@@ -11,17 +11,20 @@
 
     для django
 
-        1. python manage.py makemigrations
+        1. python manage.py migrate
 
-        2. python manage.py migrate
-
-        3. python manage.py runserver
+        2. python manage.py runserver
 
 
-    для celery
+    для celery 
+        
+        Если windows
 
-        1. celery -A datamed worker -l info -P eventlet
+            1. celery -A datamed worker -l info -P eventlet
     
+        Если linux
+        
+            1. celery -A datamed worker -l info
 
     для flower
         

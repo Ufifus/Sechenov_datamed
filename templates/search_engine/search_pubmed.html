@@ -5,6 +5,7 @@
 {% block title %}Global search{% endblock %}
 
 {% block content %}
+    <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
     <!-- Search field for the searching in the database -->
     {% if form %}
         <form class="search-form" action="{% url 'search_pubmed_page' %}" method="post">
@@ -44,6 +45,7 @@
 
                 </tbody>
             </table>
+        </div>
         <script src="{% static 'search_engine/js/progress.js' %}"></script>
         <script>
                 $(function () {

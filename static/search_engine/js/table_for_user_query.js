@@ -1,7 +1,7 @@
 new gridjs.Grid({
     columns: [
         {
-            id: 'id_doc',
+            id: 'id_doc_id',
             name: 'PMID',
             formatter: (cell) =>
                 gridjs.html(`<a href="https://pubmed.ncbi.nlm.nih.gov/${cell}/" target="_blank">${cell}</a>`)

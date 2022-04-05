@@ -1,7 +1,9 @@
 from celery import shared_task
 from celery_progress.backend import AbstractProgressRecorder
 from decimal import Decimal
+import requests
 
+from .models import Task
 from .logics import *
 
 
@@ -18,8 +20,6 @@ def get_PubMed_data_list(self, records, query_task_id):
 
     query_task = Task.objects.get(id_task=query_task_id)  # Находим наш запрос в бд и сохраняем в нем id задания worker
     query_text = f'{query_task.query_text} {query_task.date_start} до {query_task.date_end}'  # Выводим информацию о запросе на страницу
-
-    data_mas = []  # Массив данных куда мы вносим обработанную запись для вывода
 
     for num, record in enumerate(records):  # Запускаем цикл который проходит по записям и анализирует их
         clear_doc = Analise_record(_record=record, _query_task=query_task)

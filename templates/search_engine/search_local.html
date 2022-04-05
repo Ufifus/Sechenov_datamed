@@ -20,6 +20,7 @@
     <!-- Grid.js table -->
     <script type="text/javascript">
         let list = {{db_data_list|safe}};
+        console.log(list);
     </script>
     <script type="text/javascript" src="{% static 'search_engine/js/table_for_user_query.js' %}"></script>
 {% endblock %}

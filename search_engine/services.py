@@ -4,6 +4,7 @@ from .models import DdiFact, Task, Source
 from .tasks import get_PubMed_data_list as task_PubMed
 from .tasks import parse_and_analise_docs as task_PubMedv2
 from .logics import get_global_data
+from .models import DdiDocument, DvaDdi, Author, Place
 
 from django_celery_results.models import TaskResult, GroupResult
 from celery import group
@@ -19,10 +20,25 @@ sys.path.append(path_to_bert)
 def get_articles_from_db(query):
     """Получаем данные из локальной бд"""
     if query == 'all':
-        db_objs = DdiFact.objects.all()
+        db_objs = DdiFact.objects.all().values()
     else:
-        db_objs = DdiFact.objects.filter(sentence_txt__icontains=query)
-    return list(db_objs.values())
+        db_objs = DdiFact.objects.filter(sentence_txt__icontains=query).values()
+    for i, obj in enumerate(db_objs):
+        db_objs[i]['id_doc_id'] = DdiDocument.objects.get(id_doc=obj['id_doc_id']).id_record
+    return list(db_objs)
+
+def get_docs(db_tasks):
+    db_full_docs = []
+    for db_task in db_tasks:
+        db_docs_q = DdiDocument.objects.filter(task_query=db_task)
+        db_docs = list(db_docs_q.values())
+        for i, db_doc_q in enumerate(db_docs_q):
+            db_docs[i]['authors'] = list(db_doc_q.authors.all().values())
+            db_docs[i]['places'] = list(db_doc_q.places.all().values())
+            db_docs[i]['ddi_facts'] = list(DdiFact.objects.filter(id_doc=db_doc_q).values())
+            db_full_docs.append(db_docs[i])
+    print(db_full_docs[1].keys())
+    return db_full_docs
 
 
 def run_query_v1(email, search_string, query_task_id, source):
