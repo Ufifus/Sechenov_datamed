@@ -9,6 +9,7 @@ from nltk import tokenize
 import re
 
 import nltk
+
 nltk.download('punkt')
 
 path_to_BERT = path.join(path.dirname(path.dirname(path.abspath(__file__))), 'BERT_core')

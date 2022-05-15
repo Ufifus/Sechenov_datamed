@@ -10,7 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
-import os
+import os, sys
+from pathlib import Path
 import pymysql
 from dotenv import load_dotenv, dotenv_values
 
@@ -31,11 +32,10 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = int(os.environ.get("DEBUG", default=0))
-DEBUG = True
-# DEBUG = os.getenv('DEBUG')
+DEBUG = os.getenv('DEBUG')
 
 # ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(' ')
 
 # Application definition
 
@@ -91,10 +91,11 @@ WSGI_APPLICATION = 'datamed.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'datamed',
+        'NAME': 'db_datamed',
         'USER': 'root',
         'PASSWORD': 'Tema223155tema',
-        'HOST': 'localhost',
+        'HOST': 'mysql',
+        'PORT': '3306',
         }
     }
 
@@ -151,6 +152,9 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Настройка логов
+
+# Настройки редиса
 
 REDIS_HOST = os.getenv('REDIS_HOST')
 REDIS_PORT = os.getenv('REDIS_PORT')
@@ -165,3 +169,10 @@ EMAIL_HOST = os.getenv('EMAIL_HOST')
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_POST = os.getenv('EMAIL_POST')
+
+# Настройки парсера страниц
+
+PARCER_EMAIL = os.getenv('PARCER_EMAIL')
+PARCER_USER_AGENT = os.getenv('PARCER_USER_AGENT')
+RARCER_ACCEPT = os.getenv('RARCER_ACCEPT')
+PARCER_CONTENT_TYPE = os.getenv('PARCER_CONTENT_TYPE')

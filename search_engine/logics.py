@@ -1,14 +1,23 @@
 from .models import DdiFact, DdiDocument, Author, Place, DrugLink
 
-from Bio import Entrez, Medline
+from Bio import Entrez
 from pathlib import Path
-import sys, time
+import sys
+import time
+import logging
 
 # Get_core.main import main as bert_prediction
 path_to_bert = str(Path.joinpath(Path(__file__).resolve().parent.parent, 'BERT_core'))
 sys.path.append(path_to_bert)
 
+# Get Parser_core for parsing data
+path_to_parser = str(Path.joinpath(Path(__file__).resolve().parent.parent, 'Parcer_core'))
+sys.path.append(path_to_parser)
+
 from BERT_core.main import result_list_drugs as bert_prediction
+
+
+logging.basicConfig(level=logging.WARNING, filename='logics_logs.log', format='%(asctime)s %(levelname)s:%(message)s')
 
 
 class Analise_record:
@@ -21,10 +30,7 @@ class Analise_record:
 
     def ahalise_doc(self):
         """Получаем документ, проверяем в бд а потом загружаем в берт и выводим информацию"""
-        try:
-            rec_id = self.record['PMID']
-        except:
-            rec_id = self.record['PMC'][3:]
+        rec_id = self.record['ID']
         if self.check_in_database(rec_id):
             message = f'Документ под номером {rec_id} уже добавлен в базу данных'
             data = None
@@ -32,9 +38,10 @@ class Analise_record:
             self.prepare_text()
             try:
                 drug_doc = bert_prediction(rec_id, self.record['TI'], self.record['AB'])
-            except:
+            except Exception as e:
                 message = f'Произошла ошибка при обработке документа под номером {rec_id}'
                 data = None
+                logging.error(str(e))
                 return message, data
 
             len_drug_doc, count_append = self.append_in_database(drug_doc, rec_id)
@@ -135,7 +142,6 @@ class Analise_record:
                     place = Place.objects.create(place_research=place_str)
                 ddi_doc.places.add(place)
 
-
     def append_DdiFact(self, drug, ddi_doc):
         """Добавляем в бд взаимодействие"""
         ddi = DdiFact(
@@ -184,23 +190,19 @@ class Analise_record:
         return result_string, data
 
 
+class Place_dict(dict):
+    """Словарь для сохранения данных о месте исследования"""
+
+
 def get_global_data(email, source, search_str):
-    """Получение записей для группового выполнения"""
+    """Получение записей для из PubMed и PMC"""
     Entrez.email = email  # Майл пользователя
     handle = Entrez.esearch(db=source, sort='relevance', term=search_str, retmax='10000')
     record = Entrez.read(handle)
     rec_count = record['Count']  # Кол-во найденных записей
     print(search_str, ' - ', rec_count)
 
-
     idlist = record["IdList"]
-    handle = Entrez.efetch(db=source, id=idlist, rettype="medline", retmode="text")
-    records = Medline.parse(handle)
-    records_const = [record for record in records]
-    return records_const, rec_count
-
-
-class Place_dict(dict):
-    """Словарь для сохранения данных о месте исследования"""
+    return idlist, rec_count
 
 

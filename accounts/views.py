@@ -51,7 +51,7 @@ class Registation(FormView):
         form = self.get_form(form_class)
         if form.is_valid():
             new_user = form.save(commit=False)
-            new_user.is_active = False
+            new_user.is_active = True
 
 
             users = User.objects.all()
@@ -61,11 +61,11 @@ class Registation(FormView):
                     return render(request, self.template_name, context={'form': form,
                                                                         'message': message})
             new_user.save()
-            get_action_email(request, new_user)
+            # get_action_email(request, new_user)
         else:
             return render(request, self.template_name, context={'form': self.form_class, 'message': 'Неверные данные'})
 
-        return render(request, self.template_name, context={'form': form, 'message': 'check your email'})
+        return redirect('/accounts/login')
 
 
 def activate_user(request, uid64, token):

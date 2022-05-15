@@ -2,15 +2,12 @@ from django.contrib.auth.models import User
 
 from .models import DdiFact, Task, Source
 from .tasks import get_PubMed_data_list as task_PubMed
-from .tasks import parse_and_analise_docs as task_PubMedv2
 from .logics import get_global_data
-from .models import DdiDocument, DvaDdi, Author, Place
+from .models import DdiDocument
 
-from django_celery_results.models import TaskResult, GroupResult
-from celery import group
+from django_celery_results.models import TaskResult
 
 import sys
-
 from pathlib import Path
 
 path_to_bert = str(Path.joinpath(Path(__file__).resolve().parent.parent, 'BERT_core'))
@@ -26,6 +23,7 @@ def get_articles_from_db(query):
     for i, obj in enumerate(db_objs):
         db_objs[i]['id_doc_id'] = DdiDocument.objects.get(id_doc=obj['id_doc_id']).id_record
     return list(db_objs)
+
 
 def get_docs(db_tasks):
     db_full_docs = []
@@ -45,34 +43,17 @@ def run_query_v1(email, search_string, query_task_id, source):
     """1. Выполняем запрос в глобальные бд
     2. Затем полученные данные выгружаем в воркер и обновляем task
     в бд привязывая к ней номер таска который выполняет запрос"""
-    records, count = get_global_data(email, source, search_string)
+    idlist, count = get_global_data(email, source, search_string)
     if int(count) == 0:  # Если нет таких то выводим на сайт
         task_id = None
         print('this clear')
     else:
-        task = task_PubMed.delay(records, query_task_id)  # Запускаем worker-accync
+        task = task_PubMed.delay(idlist, query_task_id, source)  # Запускаем worker-accync
         task_id = task.id  # Получаем id нашего воркера для отслеживания статуса
         task_query = Task.objects.get(id_task=query_task_id)  # Находим наш запрос и сохраняем в нем id задания
         task_query.task_back = str(task_id)
         task_query.save()
     return task_id, count
-
-
-def run_query_v2(email, search_string, query_task_id, source):
-    """Данная ф-я пока в тестируется, ее суть в получении records и групповом выполнении"""
-    handle, count = get_global_data(email, source, search_string)  # Получаем записи и их количество из запроса в PubMed
-
-    if int(count) == 0:  # Если нет таких то выводим на сайт
-        task_id = None
-        print('this clear')
-    else:
-        """Думаю добавить сюда группу тасков которые принимают records;
-        вывести номер всей группы и вносить в нее изменения при при ослеживании кол-ва выполненых;
-        пока что надо подумать как это делать может join() получать выполненные и отправлять отслеживать по ним,
-        короче думаем!!!!!!!"""
-
-    return task_id, count
-
 
 
 def get_query_status(username):

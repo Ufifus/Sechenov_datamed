@@ -2,6 +2,7 @@ from django.shortcuts import render, HttpResponse, redirect
 from django.views.generic import FormView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from datamed.celery import app
+from datamed.settings import PARCER_EMAIL
 
 from .services import *
 from .forms import AddSearchForm, AddLocalSearch
@@ -41,7 +42,7 @@ class SearchPubmedView(LoginRequiredMixin, View):
             query_task_id = create_task(source, vals['user_query'], vals['query_begin'], vals['query_end'], username)
 
             if source == 'PubMed' or 'PMC':
-                email = "tens223155@gmail.com"  # Указываем почту пользователя для запроса, пока моя - заменить!!!
+                email = PARCER_EMAIL # Указываем почту пользователя для запроса, пока моя - заменить!!!
                 print(query)
                 task_id, count = run_query_v1(email, query, query_task_id, source)  # Возварщаем кол-во записей и статус задачи
             else:
