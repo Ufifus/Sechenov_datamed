@@ -57,3 +57,35 @@ class AddLocalSearch(forms.Form):
             }
         )
     )
+    
+    
+class AddSourceSearch(forms.Form):
+    user_query = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                'class': 'form-control',
+                'placeholder': 'Введите запрос...'
+            }
+        ),
+        required=True
+    )
+
+    query_begin = forms.DateField(required=True,
+                                  widget=forms.TextInput(
+                                      attrs={
+                                          'class': 'date-control',
+                                          'placeholder': 'Введите запрос...'
+                                      }
+                                  ),
+                                  initial=date.today(),
+                                  localize=True)
+
+    query_end = forms.DateField(required=True,
+                                widget=forms.TextInput(
+                                    attrs={
+                                        'class': 'date-control',
+                                        'placeholder': 'Введите запрос...'
+                                    }
+                                ),
+                                initial=date.today(),
+                                localize=True)
