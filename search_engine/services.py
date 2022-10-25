@@ -90,7 +90,7 @@ def get_search_string(dict):
             print(value)
             source = value.name
     string = f'{text} and {date_begin}:{date_end}[dp]'
-    return string, source
+    return string
 
 
 # создаем сроку с датой
