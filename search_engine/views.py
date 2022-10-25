@@ -5,7 +5,7 @@ from datamed.celery import app
 from datamed.settings import PARCER_EMAIL
 
 from .services import *
-from .forms import AddSearchForm, AddLocalSearch
+from .forms import AddSearchForm, AddLocalSearch, AddSourceSearch
 
 import json
 import sys
@@ -19,7 +19,7 @@ sys.path.append(path_to_bert)
 """Поиск в pubmed pmc и тд"""
 class SearchPubmedView(LoginRequiredMixin, View):
     template_name = 'search_engine/search_pubmed.html'
-    search_form = AddSearchForm
+    search_form = AddSourceSearch
 
     def get(self, request, *args, **kwargs):
         username = request.user.username  # Получаем пользователя который выполнил запрос
@@ -34,11 +34,18 @@ class SearchPubmedView(LoginRequiredMixin, View):
     """Получая форму мы проверяем ее на валидность и если все хорошо, то пускаем ее на обработку в Bert"""
     def post(self, request, *args, **kwargs):
         form = self.search_form(request.POST)
+        if 'search_pubmed' in request.POST:
+            source = 'PubMed'
+        elif 'search_pmc' in request.POST:
+            source = 'PMC'
+        else:
+            source = None
+        print(source)
         if form.is_valid():
             username = request.user.username
 
             vals = form.cleaned_data
-            query, source = get_search_string(vals)
+            query = get_search_string(vals)
             query_task_id = create_task(source, vals['user_query'], vals['query_begin'], vals['query_end'], username)
 
             if source == 'PubMed' or 'PMC':
